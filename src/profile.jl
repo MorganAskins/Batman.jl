@@ -36,7 +36,6 @@ function profile!(name, results; kwargs...)
     @warn idx
     return 0, 0
   end
-  @show step
   ## Store these and report if verbose
   verb_count = 0
   verb_steps = Array{Float64}(undef, 0)

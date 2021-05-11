@@ -45,10 +45,13 @@ function _covariance(x, y, μx, μy, z)
   sum( k )/N
 end
 
-function correlation_plots(results; steps=200)
+function correlation_plots(results; kwargs...)
+  kwargs = Dict(kwargs)
+  steps = get(kwargs, :steps, 200)
+  figwidth = get(kwargs, :figwidth, 10)
   ## Everything stored in results
   M = length(results.model.params)
-  fig, ax = subplots(nrows=M, ncols=M)
+  fig, ax = subplots(nrows=M, ncols=M, figsize=(M*figwidth, M*figwidth))
 
   ## We will be lazy for now and robust later. Lazy way, assume we know the range
   # What does a slice in space look like?
@@ -114,10 +117,13 @@ function correlation_plots(results; steps=200)
   end
 end
 
-function correlation_plots2(results; steps=100)
+function correlation_plots2(results; kwargs...)
+  kwargs = Dict(kwargs)
+  steps = get(kwargs, :steps, 200)
+  figwidth = get(kwargs, :figwidth, 10)
   ## Everything stored in results
   M = length(results.model.params)
-  fig, ax = subplots(nrows=M, ncols=M)
+  fig, ax = subplots(nrows=M, ncols=M, figsize=(M*figwidth, M*figwidth))
 
   levels = exp.(-[Inf,11.83,6.18,2.3,0].^0.5./2)
 

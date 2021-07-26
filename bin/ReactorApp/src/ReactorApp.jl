@@ -1,5 +1,7 @@
 #!/bin/env julia
 
+module ReactorApp
+
 push!(LOAD_PATH, "../src")
 using Batman
 using JSON
@@ -74,7 +76,7 @@ such as plots, tables, and a summary report.
 Todo:
 > 
 """
-function main()
+function julia_main()
   parsed_args    = parse_commandline()
   reactor_config = parse_json(parsed_args)
   options = reactor_config.options
@@ -115,6 +117,7 @@ function main()
   @show length(sens)
   plt.plot(days, sens)
   plt.savefig("results.svg")
+  return 0
 end
 
-main()
+end # module

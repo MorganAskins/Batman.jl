@@ -4,6 +4,6 @@ within the code base yet. Definitions listed here are likely to move at some
 point.
 """
 module Toolbelt
-include("mcmcsampler.jl")
+#include("mcmcsampler.jl")
 
-end # Module
+end # Module Toolbelt

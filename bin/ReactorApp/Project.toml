@@ -1,0 +1,10 @@
+name = "ReactorApp"
+uuid = "febfa3f4-5681-4153-a881-ab95b04382ef"
+authors = ["Morgan Askins <maskins@ucdavis.edu>"]
+version = "0.1.0"
+[deps]
+ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
+Batman = "35b143b4-47a7-11ea-2ac1-af8cbc4ae307"
+JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
+SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"

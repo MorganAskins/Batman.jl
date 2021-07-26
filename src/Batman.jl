@@ -1,7 +1,5 @@
 """
-Batman
-
-Julia library designed to build statistical models with associated systematic
+Julia package designed to build statistical models with associated systematic
 uncertainties and provide inference into particular parameters of interest.
 Both Bayesian and Frequentist analysis are supported.
 """
@@ -14,6 +12,24 @@ using SpecialFunctions
 using PyPlot
 using Printf
 
+# Logging
+import Logging
+
+function bat_format(level, _module, group, id, file, line)
+  color, prefix, suffix = Logging.default_metafmt(level, _module, group, id, file, line)
+  suffix = level == Logging.Debug ? "" : suffix
+  return color, prefix, suffix
+end
+
+function bat_log(;kwargs...)
+  kwargs = Dict(kwargs)
+  debugLevel = haskey(ENV, "JULIA_DEBUG") ? Logging.Debug : Logging.Info
+  debugLevel = get(kwargs, :level, debugLevel)
+  Logging.ConsoleLogger( stdout, debugLevel; meta_formatter=bat_format )
+end
+
+Logging.global_logger( bat_log() )
+
 # Primary definitions
 include("predefined_functions.jl")
 include("variable.jl")
@@ -24,6 +40,9 @@ include("plotter.jl")
 include("show.jl")
 # Kit definitions
 include("modelkits/base.jl")
+# Submodules
+include("datastructures/DataStructures.jl")
+include("toolbelt/Toolbelt.jl")
 # Finally, macros
 include("macros.jl")
 
@@ -43,4 +62,4 @@ for sym in names(@__MODULE__, all=true)
   @eval export $sym
 end
 
-end # End module
+end # End module Batman

@@ -1,3 +1,20 @@
+"""
+    CountingExperiment()
+
+Building a Poisson counting model of n>1 components, each
+added individual, including uncertainties.
+
+# Example
+```jldoctest
+julia> m = CountingExperiment()
+
+julia> add_component!(m, "Signal", 20.0)
+julia> add_component!(m, "Background", 30.0; σ=5.0)
+
+julia> set_counts!(m, 55)
+julia> results = minimize!(m)
+```
+"""
 mutable struct CountingExperiment <: Model
   params
   pdflist

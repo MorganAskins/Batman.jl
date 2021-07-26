@@ -26,8 +26,8 @@ function add_nlogpdfs!( m::CustomModel, pdflist::Array{NLogPDF} )
   end
 end
 
-function minimize!( m::CustomModel )
+function minimize!( m::CustomModel; options=Dict() )
   likelihood = NLogLikelihood( m.pdflist )
   add_likelihood!( m, likelihood )
-  optimize_model!( m, likelihood )
+  optimize_model!( m, likelihood; options=options )
 end

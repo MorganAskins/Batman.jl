@@ -2,3 +2,4 @@ dependencies:
   - matplotlib
   - numpy
   - pip
+  - awkward

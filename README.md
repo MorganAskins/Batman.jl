@@ -16,7 +16,7 @@ experimental sensitivity._
 ## Installation
 With Julia, you can install the Batman.jl package using the built-in
 package manager.
-```julia
+```julia-repl
 julia> using Pkg
 julia> Pkg.add(PackageSpec(url="https://github.com/MorganAskins/Batman.jl"))
 ```
@@ -24,6 +24,20 @@ julia> Pkg.add(PackageSpec(url="https://github.com/MorganAskins/Batman.jl"))
 ## Documentation
 - [**STABLE**][stable-url] &mdash; **Documentation of the most recently tagged version.**
 - [**DEVEL**][dev-url] &mdash; *Documentation of the master branch.*
+
+### Local Documentation
+Documentation for Batman is built using [Documenter.jl].  From the `/docs/`
+directory, the documentation can be built locally into `/docs/build` via
+```bash
+julia make.jl
+```
+this directory is already ignored by git. The file `/docs/build/index.html` can
+be opened in a browser to view the newly built documentation.
+
+## Jupyter Notebooks / Lab
+
+
+---
 
 [binder-img]: https://mybinder.org/badge_logo.svg
 [binder-url]: https://mybinder.org/v2/gh/MorganAskins/Batman.jl/master
@@ -47,3 +61,4 @@ julia> Pkg.add(PackageSpec(url="https://github.com/MorganAskins/Batman.jl"))
 [docker-url]: https://hub.docker.com/r/morganaskins/batman.jl
 
 [Julia]: http://julialang.org/
+[Documenter.jl]: https://github.com/JuliaDocs/Documenter.jl

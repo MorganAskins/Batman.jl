@@ -44,6 +44,7 @@ end
 function minimize!( m::CountingExperiment )
   poisson_pdf = NLogPDF("logpoisson", m.counts, (m.params)...)
   likelihood = NLogLikelihood([m.pdflist..., poisson_pdf])
+  # Fitter options
   add_likelihood!( m, likelihood )
   optimize_model!( m, likelihood )
   #optimize_model!( m, likelihood; 

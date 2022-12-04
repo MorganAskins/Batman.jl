@@ -77,6 +77,55 @@ mutable struct NLogLikelihood
   end
 end
 
+function FunctionPDF(fun; kwargs...)
+  kwargs = Dict(kwargs)
+  return x->fun.(x...)
+end
+
+"""
+    MultiHistogramPDF(df::DataFrame, axis::Symbol; kwargs...)
+
+Given a set of data `df`, along an axis `axis`, build a histogram
+to be used as a PDF in a fit.
+
+# Arguments
+- `df::DataFrame`: Data to build the PDF
+- `axis::Symbol`: Axis along which to slice the data
+- `ndim::Integer=1`: Number of dimensions
+- `bins=100`: Number of bins, or collection of bins.
+- `interpolate=Interpolations.Constant()`: Constant or Linear interpolation
+- `extrapolate=0`: Flat(), Linear(), or 0 extrapolation.
+"""
+function MultiHistogramPDF(df::DataFrame, axes::Vector{Symbol}; kwargs...)
+  kwargs = Dict(kwargs)
+  ndim = get(kwargs, :dimensions, 1)
+  bins = Tuple(get(kwargs, :bins, 100))
+  itp_model = get(kwargs, :interpolate, itp.Constant())
+  etp_model = get(kwargs, :extrapolate, 0)
+  weight_symbol = get(kwargs, :weight, nothing)
+  probability = get(kwargs, :probability, "Histogram")
+
+  z = Tuple([df[!, s] for s in axes])
+  mass = weight_symbol != nothing ? StatsBase.weights(df[!, weight_symbol]) : StatsBase.weights(ones(size(df[!, axes[1]])))
+  if( probability == "KDE" )
+    ## Optionally build using a KDE
+    ndim = length(axes)
+    k = KernelDensity.kde( z )
+    imd = KernelDensity.InterpKDE(k)
+    p(x) = KernelDensity.pdf(imd, x)
+    return x->p.(x...)
+  else
+    ## Special to mutli-dimensional models
+    h = StatsBase.fit( StatsBase.Histogram, z, mass, bins )
+    hxs = Tuple([(j[2:end] + j[1:end-1])/2.0 for j in h.edges])
+    volume = prod([(j[2]-j[1]) for j in hxs])
+    hy = h.weights
+    hy = hy ./ sum(hy) ./ volume
+    f = itp.extrapolate(itp.interpolate(hxs, hy, itp.Gridded(itp_model)), etp_model)
+    return x->f.(x...)
+  end
+end
+
 """
     HistogramPDF(df::DataFrame, axis::Symbol; kwargs...)
 
@@ -99,69 +148,17 @@ function HistogramPDF(df::DataFrame, axis::Symbol; kwargs...)
   etp_model = get(kwargs, :extrapolate, 0)
   weight_symbol = get(kwargs, :weight, nothing)
   mass = weight_symbol != nothing ? StatsBase.weights(df[!, weight_symbol]) : StatsBase.weights(ones(size(df[!, axis])))
-  h = StatsBase.fit( StatsBase.Histogram, df[!, axis], mass, bins; closed=:right )
+  h = StatsBase.fit( StatsBase.Histogram, df[!, axis], mass, bins)
   hx, hy = (h.edges[1][2:end] + h.edges[1][1:end-1])/2.0, h.weights
   #hx, hy = h.edges[1][2:end], h.weights
-
-  # This works, but turning off for now
-  return function_from_hist(h)
-
-  ## SKIP BELOW
+  #hy = hy ./ sum(hy) ./ (hx[2]-hx[1])
   hy = hy ./ sum(hy) ./ (hx[2]-hx[1])
-  #hy = hy ./ sum(hy)
-  #
   f = itp.extrapolate( 
-        itp.interpolate((hx,), hy, itp.Gridded(itp_model)), etp_model
-      )
+      itp.interpolate((hx,), hy, itp.Gridded(itp_model)), etp_model
+  )
   return x->f(x)
-  # Now we need a more precise integral
-  lowx = minimum(bins)
-  hix = maximum(bins)
-  bw = (hix - lowx) / length(bins) / 1_000_000.0
-  integral_range = collect(lowx:bw:hix)
-  integral = sum( f.(integral_range) )*bw
-  x->f(x)/integral
 end
 
-function function_from_hist(h::StatsBase.Histogram)
-  # Normalize
-  hx, hy = h.edges, h.weights
-  hx = hx[1]
-  hy = hy ./ sum( hy ) ./ (hx[2] - hx[1])
-  push!(hy, 0)
-  newfunc = function (x)
-    lasty = 0
-    for (testx, testy) in zip(hx, hy)
-      ## JUST CHANGED TO >=?
-      if testx > x
-        return lasty
-      end
-      lasty = testy
-    end
-    0
-  end
-  return x -> newfunc.(x)
-  ## We should test the function real quick I suppose
-  #bw = (hx[2] - hx[1]) / 1_000.0
-  #integral_range = collect(hx[1]:bw:hx[end])
-  #integral = sum( newfunc.(integral_range) )*bw
-  #@show "New Integral:: " integral
-  #newnewfunc = x->newfunc.(x) / integral
-  #bw = (hx[2] - hx[1]) / 10_000.0
-  #integral_range = collect(hx[1]:bw:hx[end])
-  #integral = sum( newnewfunc.(integral_range) )*bw
-  #@show "New New Integral:: " integral
-  #return x -> newnewfunc.(x)
-end
-
-## Okay, lets throw this in a temp funciton
-#function HistogramPDF(df::DataFrame, axis::Symbol; kwargs...)
-#  a = rand()*10.0
-#  b = rand()*3.0
-#  #(x)->(a.*x .+ b)./(a+b)
-#  norm = (cos(b)-cos(a+b)+a)/(2*a)
-#  (x)-> (sin.(a.*x .+ b) .+ 1) ./ 2 ./ norm
-#end
 
 """
     KdePDF(df::DataFrame, axis::Symbol; kwargs...)

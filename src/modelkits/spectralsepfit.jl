@@ -8,18 +8,17 @@ struct SingleSpectra
 end
 
 """
-    SpectralMonofit()
+    SpectralSepfit()
 
 Multidimensional fit to one-dimensional distributions (neglecting
-correlations between observables). Here we take the joint 1-dimensional
-probability as the total probability.
+correlations between observables).
 
 # Example
 ```julia-repl
-m = SpectralMonofit()
+m = SpectralSepfit()
 ```
 """
-mutable struct SpectralMonofit <: Model
+mutable struct SpectralSepfit <: Model
   params
   pdflist::Array{NLogPDF}
   nll::NLogLikelihood
@@ -27,7 +26,7 @@ mutable struct SpectralMonofit <: Model
   spectra::Array{SingleSpectra}
   datasets::Array{Symbol}
   observables::Array{Observable}
-  function SpectralMonofit(observables::Symbol...)
+  function SpectralSepfit(observables::Symbol...)
     new( [], [], NLogLikelihood(), 
         Array{SingleSpectra}(undef, 0), Array{DataFrame}(undef, 0), Array{Observable}(undef, 0) )
   end
@@ -39,15 +38,15 @@ struct SpectralPDF
 end
 
 """
-    generate_mock_dataset(m::SpectralMonofit; kwargs...)
+    generate_mock_dataset(m::SpectralSepfit; kwargs...)
 
 words
 
 # Arguments
-- `m::SpectralMonofit`: Specific model type
+- `m::SpectralSepfit`: Specific model type
 - `time::Float64`: Length of the dataset
 """
-function generate_mock_dataset(m::SpectralMonofit; kwargs...)
+function generate_mock_dataset(m::SpectralSepfit; kwargs...)
   kwargs = Dict(kwargs)
   time = get(kwargs, :time, 1.0)
   # Clean out the old data
@@ -106,7 +105,7 @@ function compare_and_add!(df1::DataFrame, df2)
 end
 
 
-function genmo(m::SpectralMonofit; kwargs...)
+function genmo(m::SpectralSepfit; kwargs...)
   kwargs = Dict(kwargs)
   time = get(kwargs, :time, 1.0)
   verbose   = get(kwargs, :verbose, false)
@@ -151,7 +150,7 @@ function genmo(m::SpectralMonofit; kwargs...)
   dictDPCount
 end
 
-function updateDataFunctions!(m::SpectralMonofit)
+function updateDataFunctions!(m::SpectralSepfit)
   for sp in m.spectra
     pname = sp.p.name
     obs = sp.o.name
@@ -160,7 +159,7 @@ function updateDataFunctions!(m::SpectralMonofit)
   end
 end
 
-function constructPDF!(m::SpectralMonofit, p::Parameter, shapes, observables, ds::Symbol)
+function constructPDF!(m::SpectralSepfit, p::Parameter, shapes, observables, ds::Symbol)
   if !(ds in m.datasets)
     push!(m.datasets, ds)
   end
@@ -180,23 +179,7 @@ function constructPDF!(m::SpectralMonofit, p::Parameter, shapes, observables, ds
   SpectralPDF(p, unique_name)
 end
 
-function constructPDFMulti!(m::SpectralMonofit, p::Parameter, shapes, observables, ds::Symbol)
-  if !(ds in m.datasets)
-    push!(m.datasets, ds)
-  end
-  seval = ""
-  # Not longer shape, but splat
-  fSymbol = Symbol(p.name*"_"*String(ds))
-  dfsplat = Tuple([eval(ds)[!, s] for s in observables])
-  add_array(fSymbol, shapes(dfsplat) )
-  seval *= "$fSymbol"
-  @debug seval
-  unique_name = "spectralPDF_"*p.name*"_"*String(ds)
-  add_function(unique_name, eval(Meta.parse("()->"*seval)))
-  SpectralPDF(p, unique_name)
-end
-
-function combinePDFs!(m::SpectralMonofit, spectralpdfs::Array{SpectralPDF}, 
+function combinePDFs!(m::SpectralSepfit, spectralpdfs::Array{SpectralPDF}, 
                       ds::Symbol; kwargs... )
   kwargs = Dict(kwargs)
   livetime = get(kwargs, :livetime, nothing)
@@ -250,7 +233,7 @@ function combinePDFs!(m::SpectralMonofit, spectralpdfs::Array{SpectralPDF},
 end
 
 ## LAZY
-#function combinePDFs!(m::SpectralMonofit, spectralpdfs::Array{SpectralPDF}, 
+#function combinePDFs!(m::SpectralSepfit, spectralpdfs::Array{SpectralPDF}, 
 #                      ds::Symbol; kwargs... )
 #  kwargs = Dict(kwargs)
 #  livetime = get(kwargs, :livetime, nothing)
@@ -303,7 +286,7 @@ end
 #  push!(m.pdflist, NLogPDF(unique_name, plist...))
 #end
 
-function add_parameter!(m::SpectralMonofit, name::String, init; σ=Inf, kwargs... )
+function add_parameter!(m::SpectralSepfit, name::String, init; σ=Inf, kwargs... )
   kwargs = Dict(kwargs)
   dsEfficiency = get(kwargs, :dsEfficiency, (Symbol(name)=>1.0))
   bounds = get(kwargs, :bounds, (-Inf, Inf))
@@ -328,7 +311,7 @@ function add_parameter!(m::SpectralMonofit, name::String, init; σ=Inf, kwargs..
   return p
 end
 
-function add_constant!(m::SpectralMonofit, name::String, init)
+function add_constant!(m::SpectralSepfit, name::String, init)
   k = getparam(m, name)
   if k != nothing
     @warn name*" already exists in model."
@@ -337,11 +320,11 @@ function add_constant!(m::SpectralMonofit, name::String, init)
   Constant(name, init)
 end
 
-function add_observable!(m::SpectralMonofit, name::Symbol, min::Float64, max::Float64)
+function add_observable!(m::SpectralSepfit, name::Symbol, min::Float64, max::Float64)
   push!(m.observables, Observable(String(name), name, min, max))
 end
 
-function observableFromSymbol(m::SpectralMonofit, name::Symbol)
+function observableFromSymbol(m::SpectralSepfit, name::Symbol)
   for obs in m.observables
     if obs.sname == name
       return obs
@@ -350,7 +333,7 @@ function observableFromSymbol(m::SpectralMonofit, name::Symbol)
   return nothing
 end
 
-function minimize!( m::SpectralMonofit; options=Dict() )
+function minimize!( m::SpectralSepfit; options=Dict() )
   likelihood = NLogLikelihood( m.pdflist )
   add_likelihood!( m, likelihood )
   optimize_model!( m, likelihood; options=options )

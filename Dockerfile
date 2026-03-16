@@ -1,6 +1,6 @@
-FROM julia:1.3
+FROM julia:1.11
 LABEL maintainer="Morgan Askins <maskins@berkeley.edu>"
 
-RUN julia -e 'using Pkg;\
-              Pkg.REPLMode.pkgstr("add https://github.com/MorganAskins/Batman.jl.git ;precompile");\
+RUN julia -e 'using Pkg; \
+              Pkg.add(url="https://github.com/MorganAskins/Batman.jl.git"); \
               using Batman'

@@ -1,4 +1,5 @@
 # Batman.jl
+
 _A **B**ayesian **A**nalysis **T**oolkit for **M**onitoring
 **A**nti-**N**eutrinos, written in [Julia], which provides a statistical
 analysis interface geared towards low-count experiments. BATMAN provides many
@@ -8,42 +9,68 @@ experimental sensitivity._
 |                   |                                        |
 | :---------------- | :------------------------------------- |
 | **Documentation** | [![][stable-img]][stable-url] [![][dev-img]][dev-url] |
-| **Development**   | [![][travis-img]][travis-url] [![][appveyor-img]][appveyor-url] [![][codecov-img]][codecov-url] |
-| **Deployment**    | [![][docker-img]][docker-url] [![][binder-img]][binder-url] |
+| **Build Status**  | [![][ci-img]][ci-url] [![][codecov-img]][codecov-url] |
 
 ---
 
+## Requirements
+
+- Julia 1.10 or later
+
 ## Installation
+
 With Julia, you can install the Batman.jl package using the built-in
 package manager.
-```julia-repl
-julia> using Pkg
-julia> Pkg.add(PackageSpec(url="https://github.com/MorganAskins/Batman.jl"))
+```julia
+using Pkg
+Pkg.add(url="https://github.com/MorganAskins/Batman.jl")
+```
+
+Or using the Pkg REPL:
+```
+pkg> add https://github.com/MorganAskins/Batman.jl
+```
+
+## Quick Start
+
+```julia
+using Batman
+
+# Create a Poisson counting experiment
+m = CountingExperiment()
+add_component!(m, "Signal", 20.0)
+add_component!(m, "Background", 30.0; σ=5.0)
+set_counts!(m, 55)
+
+# Fit and compute uncertainties
+results = minimize!(m)
+compute_profiled_uncertainties!(results; σ=1)
+pretty_results(results)
 ```
 
 ## Documentation
+
 - [**STABLE**][stable-url] &mdash; **Documentation of the most recently tagged version.**
-- [**DEVEL**][dev-url] &mdash; *Documentation of the master branch.*
+- [**DEV**][dev-url] &mdash; *Documentation of the development branch.*
 
 ### Local Documentation
-Documentation for Batman is built using [Documenter.jl].  From the `/docs/`
+
+Documentation for Batman is built using [Documenter.jl]. From the `/docs/`
 directory, the documentation can be built locally into `/docs/build` via
 ```bash
-julia make.jl
+julia --project=docs/ docs/make.jl
 ```
-this directory is already ignored by git. The file `/docs/build/index.html` can
-be opened in a browser to view the newly built documentation.
+This directory is already ignored by git. Open `/docs/build/index.html` in a
+browser to view the newly built documentation.
 
-## Jupyter Notebooks / Lab
+## License
 
+MIT License - see [LICENSE.md](LICENSE.md) for details.
 
 ---
 
-[binder-img]: https://mybinder.org/badge_logo.svg
-[binder-url]: https://mybinder.org/v2/gh/MorganAskins/Batman.jl/master
-
-[travis-img]: https://travis-ci.com/MorganAskins/Batman.jl.svg?branch=master
-[travis-url]: https://travis-ci.com/MorganAskins/Batman.jl
+[ci-img]: https://github.com/MorganAskins/Batman.jl/actions/workflows/CI.yml/badge.svg?branch=master
+[ci-url]: https://github.com/MorganAskins/Batman.jl/actions/workflows/CI.yml?query=branch%3Amaster
 
 [stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [stable-url]: https://MorganAskins.github.io/Batman.jl/stable
@@ -54,11 +81,5 @@ be opened in a browser to view the newly built documentation.
 [codecov-img]: https://codecov.io/gh/MorganAskins/Batman.jl/branch/master/graph/badge.svg
 [codecov-url]: https://codecov.io/gh/MorganAskins/Batman.jl
 
-[appveyor-img]: https://ci.appveyor.com/api/projects/status/sb0jkbj2thwdu3mr/branch/master?svg=true
-[appveyor-url]: https://ci.appveyor.com/project/MorganAskins/batman-jl/branch/master
-
-[docker-img]: https://img.shields.io/docker/cloud/build/morganaskins/batman.jl
-[docker-url]: https://hub.docker.com/r/morganaskins/batman.jl
-
-[Julia]: http://julialang.org/
+[Julia]: https://julialang.org/
 [Documenter.jl]: https://github.com/JuliaDocs/Documenter.jl

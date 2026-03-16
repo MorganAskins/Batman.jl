@@ -1,34 +1,36 @@
 """
+    Batman
+
 Julia package designed to build statistical models with associated systematic
 uncertainties and provide inference into particular parameters of interest.
 Both Bayesian and Frequentist analysis are supported.
+
+**B**ayesian **A**nalysis **T**oolkit for **M**onitoring **A**nti-**N**eutrinos.
 """
-module Batman 
+module Batman
 
 using NLopt
 using DataFrames
 using DataStructures
 using SpecialFunctions
-using PyPlot
 using Printf
 
-# Logging
 import Logging
 
 function bat_format(level, _module, group, id, file, line)
-  color, prefix, suffix = Logging.default_metafmt(level, _module, group, id, file, line)
-  suffix = level == Logging.Debug ? "" : suffix
-  return color, prefix, suffix
+    color, prefix, suffix = Logging.default_metafmt(level, _module, group, id, file, line)
+    suffix = level == Logging.Debug ? "" : suffix
+    return color, prefix, suffix
 end
 
-function bat_log(;kwargs...)
-  kwargs = Dict(kwargs)
-  debugLevel = haskey(ENV, "JULIA_DEBUG") ? Logging.Debug : Logging.Info
-  debugLevel = get(kwargs, :level, debugLevel)
-  Logging.ConsoleLogger( stdout, debugLevel; meta_formatter=bat_format )
+function bat_log(; kwargs...)
+    kwargs = Dict(kwargs)
+    debugLevel = haskey(ENV, "JULIA_DEBUG") ? Logging.Debug : Logging.Info
+    debugLevel = get(kwargs, :level, debugLevel)
+    Logging.ConsoleLogger(stdout, debugLevel; meta_formatter=bat_format)
 end
 
-Logging.global_logger( bat_log() )
+Logging.global_logger(bat_log())
 
 # Primary definitions
 include("predefined_functions.jl")
@@ -48,18 +50,18 @@ include("macros.jl")
 
 # Batman exports based on a blacklist; where functions
 # which begin with "_" are not exported.
-const _EXCLUDE_SYMBOLS=[Symbol(@__MODULE__), :eval, :include]
+const _EXCLUDE_SYMBOLS = [Symbol(@__MODULE__), :eval, :include]
 
-for sym in names(@__MODULE__, all=true)
-  sym_string = string(sym)
-  if sym in _EXCLUDE_SYMBOLS || startswith(sym_string, "_")
-    continue
-  end
-  if !(Base.isidentifier(sym) || (startswith(sym_string, "@") &&
-                                  Base.isidentifier(sym_string[2:end])))
-    continue
-  end
-  @eval export $sym
+for sym in names(@__MODULE__; all=true)
+    sym_string = string(sym)
+    if sym in _EXCLUDE_SYMBOLS || startswith(sym_string, "_")
+        continue
+    end
+    if !(Base.isidentifier(sym) || (startswith(sym_string, "@") &&
+                                    Base.isidentifier(sym_string[2:end])))
+        continue
+    end
+    @eval export $sym
 end
 
-end # End module Batman
+end # module Batman

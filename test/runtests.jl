@@ -1,8 +1,9 @@
-using Test, Batman
+using Batman
+using Test
 
-## Ideas for tests
-# 1. Simple coverage tests. Try to use all functions
-# 2. Benchmarking tests; speed of objective functions
-# 3. Bias / pull for known fits.
-
-include("poisson.jl")
+@testset "Batman.jl" begin
+    include("poisson.jl")
+    include("test_predefined_functions.jl")
+    include("test_variable.jl")
+    include("test_custom_model.jl")
+end

@@ -2,3 +2,7 @@ examples/.ipynb_checkpoints*
 .ipynb_checkpoints*
 *.svg
 docs/build/
+Manifest.toml
+*.jl.cov
+*.jl.*.cov
+*.jl.mem
